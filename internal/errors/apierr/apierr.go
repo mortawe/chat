@@ -1,6 +1,9 @@
 package apierr
 
 const (
-	NameAlreadyInUse = "name already in use"
-	NoSuchUserOrChat = "no such user or chat"
+	NameInUse       = "name already in use"
+	NoSuchUser      = "no such user"
+	NoSuchChat      = "no such chat"
+	UserNotInChat   = "user not in this chat"
+	UserInChatTwice = "user in chat twice"
 )

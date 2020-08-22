@@ -8,5 +8,5 @@ import (
 
 type UC interface {
 	Create(ctx context.Context, chat *models.Chat) error
-	GetChatsByUser(ctx context.Context, userID models.ID) ([]models.Chat, error)
+	GetList(ctx context.Context, userID models.ID) ([]models.Chat, error)
 }

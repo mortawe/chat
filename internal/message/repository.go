@@ -8,5 +8,5 @@ import (
 
 type Repo interface {
 	Create(ctx context.Context, chat *models.Message) error
-	GetByChat(ctx context.Context, chatID models.ID) ([]models.Message, error)
+	GetList(ctx context.Context, chatID models.ID) ([]models.Message, error)
 }

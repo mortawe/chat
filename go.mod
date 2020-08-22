@@ -8,7 +8,6 @@ require (
 	github.com/jackc/pgerrcode v0.0.0-20190803225404-afa3381909a6
 	github.com/jackc/pgx/v4 v4.8.1
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/mailru/easyjson v0.7.3
 	github.com/sirupsen/logrus v1.4.2
 	github.com/valyala/fasthttp v1.15.1
 	google.golang.org/appengine v1.6.6 // indirect

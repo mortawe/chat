@@ -2,15 +2,18 @@ package delivery
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/fasthttp/router"
+	"net/http"
+
 	"github.com/mortawe/chat/internal/errors/apierr"
-	"github.com/mortawe/chat/internal/errors/dberr"
+	"github.com/mortawe/chat/internal/errors/ucerr"
 	"github.com/mortawe/chat/internal/message"
 	"github.com/mortawe/chat/internal/models"
+
+	"github.com/fasthttp/router"
 	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
-	"net/http"
 )
 
 type MsgHandler struct {
@@ -33,8 +36,8 @@ func (h *MsgHandler) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	err := h.msgUC.Create(ctx, msg)
-	if dberr.IsUniqueViolationErr(err) {
-		ctx.Error(apierr.NoSuchUserOrChat, http.StatusConflict)
+	if errors.Is(err, ucerr.ErrUserNotInChat) {
+		ctx.Error(apierr.UserNotInChat, http.StatusForbidden)
 		return
 	}
 	if err != nil {
@@ -46,19 +49,19 @@ func (h *MsgHandler) Create(ctx *fasthttp.RequestCtx) {
 	ctx.SetStatusCode(http.StatusOK)
 }
 
-type ListArgs struct {
-	ChatID models.ID `json:"chat_id"`
+type ListMsgArgs struct {
+	ChatID models.ID `json:"chat"`
 }
 
 func (h *MsgHandler) List(ctx *fasthttp.RequestCtx) {
-	args := &ListArgs{}
+	args := &ListMsgArgs{}
 	if err := json.Unmarshal(ctx.PostBody(), args); err != nil {
 		ctx.Error(err.Error(), http.StatusBadRequest)
 		return
 	}
-	msgList, err := h.msgUC.GetByChat(ctx, args.ChatID)
-	if dberr.IsForeignKeyViolation(err) {
-		ctx.Error(apierr.NoSuchUserOrChat, http.StatusConflict)
+	msgList, err := h.msgUC.GetList(ctx, args.ChatID)
+	if errors.Is(err, ucerr.ErrNoChat) {
+		ctx.Error(apierr.NoSuchChat, http.StatusBadRequest)
 		return
 	}
 	if err != nil {

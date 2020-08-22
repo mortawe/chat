@@ -1,7 +1,0 @@
-api:
-  server:
-    addr: ":8000"
-  postgres:
-    user: "user"
-    pass: "pass"
-    name: "api_db"

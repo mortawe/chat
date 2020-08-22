@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/fasthttp/router"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -9,22 +10,10 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-var (
-	DefaultDBAddr = "db:5432"
-	DefaultDBUser = "user"
-	DefaultDBPass = "pass"
-	DefaultDBName = "chat-db"
-)
-
 func main() {
 	logrus.SetLevel(logrus.DebugLevel)
 	db, err := sqlx.Connect("pgx", fmt.Sprintf(
-		"postgres://%s:%s@%s/%s",
-		DefaultDBUser,
-		DefaultDBPass,
-		DefaultDBAddr,
-		DefaultDBName,
-	))
+		"postgres://%s:%s@%s/%s", DBUser, DBPass, DBAddr, DBName))
 	if err != nil {
 		logrus.Error(err)
 		return

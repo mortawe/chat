@@ -2,11 +2,12 @@ package delivery
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/mortawe/chat/internal/errors/apierr"
-	"github.com/mortawe/chat/internal/errors/dberr"
+	"github.com/mortawe/chat/internal/errors/ucerr"
 	"github.com/mortawe/chat/internal/models"
 	"github.com/mortawe/chat/internal/user"
 
@@ -34,8 +35,8 @@ func (h *UserHandler) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	err := h.userUC.Create(ctx, user)
-	if dberr.IsUniqueViolationErr(err) {
-		ctx.Error(apierr.NameAlreadyInUse, http.StatusConflict)
+	if errors.Is(err, ucerr.ErrNameAlreadyInUse) {
+		ctx.Error(apierr.NameInUse, http.StatusConflict)
 		return
 	}
 	if err != nil {
@@ -44,5 +45,5 @@ func (h *UserHandler) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	ctx.WriteString(fmt.Sprint(user.ID))
-	ctx.SetStatusCode(http.StatusOK)
+	ctx.SetStatusCode(http.StatusCreated)
 }

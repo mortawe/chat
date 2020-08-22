@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgerrcode"
 )
 
-func isErr(err error, code string) bool{
+func isErr(err error, code string) bool {
 	pgerr := &pgconn.PgError{}
 	if !errors.As(err, &pgerr) {
 		return false

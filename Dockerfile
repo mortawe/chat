@@ -4,11 +4,9 @@ ADD . .
 
 RUN make build
 
-#FROM debian:buster-slim
-#
-#WORKDIR /app
-#
-#COPY --from=build /app/bin/chat .
+ENV DB_USER=user
+ENV DB_PASS=pass
+ENV DB_NAME=chat-db
+ENV DB_ADDR=db:5432
 
-#RUN chmod +x /app/chat
 CMD ["/app/bin/chat"]

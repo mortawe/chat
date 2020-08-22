@@ -1,83 +1,79 @@
-create table users
+CREATE TABLE IF NOT EXISTS users
 (
-    id         serial                                 not null
-        constraint user_pk
-            primary key,
-    username   varchar                                not null,
-    created_at timestamp with time zone default now() not null
+    id         serial                                 NOT NULL
+        CONSTRAINT user_pk
+            PRIMARY KEY,
+    username   varchar                                NOT NULL,
+    created_at timestamp WITH TIME ZONE DEFAULT now() NOT NULL
 );
 
-alter table users
-    owner to "user";
+ALTER TABLE users
+    OWNER TO "user";
 
-create unique index user_id_uindex
-    on users (id);
+CREATE UNIQUE INDEX IF NOT EXISTS user_id_uindex
+    ON users (id);
 
-create unique index user_username_uindex
-    on users (username);
+CREATE UNIQUE INDEX IF NOT EXISTS user_username_uindex
+    ON users (username);
 
-create table chats
+CREATE TABLE IF NOT EXISTS chats
 (
-    id         serial                                 not null
-        constraint chat_pk
-            primary key,
+    id         serial                                 NOT NULL
+        CONSTRAINT chat_pk
+            PRIMARY KEY,
     name       varchar,
-    created_at timestamp with time zone default now() not null
+    created_at timestamp WITH TIME ZONE DEFAULT now() NOT NULL
 );
 
-alter table chats
-    owner to "user";
+ALTER TABLE chats
+    OWNER TO "user";
 
-create unique index chat_id_uindex
-    on chats (id);
+CREATE UNIQUE INDEX IF NOT EXISTS chat_id_uindex
+    ON chats (id);
 
-create unique index chat_name_uindex
-    on chats (name);
+CREATE UNIQUE INDEX IF NOT EXISTS chat_name_uindex
+    ON chats (name);
 
-create table messages
+CREATE TABLE IF NOT EXISTS chat_users
 (
-    id         serial                                 not null
-        constraint messages_pk
-            primary key,
-    chat_id    integer                                not null
-        constraint messages_chat_id_fk
-            references chats
-            on update cascade on delete cascade,
-    author_id  integer                                not null
-        constraint messages_user_id_fk
-            references users
-            on update cascade on delete cascade,
+    chat_id integer NOT NULL
+        CONSTRAINT chat_users_chats_id_fk
+            REFERENCES chats
+            ON UPDATE CASCADE ON DELETE CASCADE,
+    user_id integer NOT NULL
+        CONSTRAINT chat_users_users_id_fk
+            REFERENCES users
+            ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX chat_users_chat_id_user_id_uindex
+    ON chat_users (chat_id, user_id);
+
+
+ALTER TABLE chat_users
+    OWNER TO "user";
+
+CREATE TABLE IF NOT EXISTS messages
+(
+    id         serial                                 NOT NULL
+        CONSTRAINT messages_pk
+            PRIMARY KEY,
+    chat_id    integer                                NOT NULL
+        CONSTRAINT messages_chat_id_fk
+            REFERENCES chats
+            ON UPDATE CASCADE ON DELETE CASCADE,
+    author_id  integer                                NOT NULL
+        CONSTRAINT messages_user_id_fk
+            REFERENCES users
+            ON UPDATE CASCADE ON DELETE CASCADE,
     text       varchar,
-    created_at timestamp with time zone default now() not null
+    created_at timestamp WITH TIME ZONE DEFAULT now() NOT NULL,
+    CONSTRAINT messages_chat_users_user_id_chat_id_fk
+        FOREIGN KEY (author_id, chat_id) REFERENCES chat_users (user_id, chat_id)
 );
 
-alter table messages
-    owner to "user";
+ALTER TABLE messages
+    OWNER TO "user";
 
-create unique index messages_id_uindex
-    on messages (id);
-
-create trigger add_users_to_chat
-    after update
-    on messages
-    for each row
-execute procedure add_users_to_chat_after_create_msg();
-
-create table chat_users
-(
-    chat_id integer not null
-        constraint chat_users_chats_id_fk
-            references chats
-            on update cascade on delete cascade,
-    user_id integer not null
-        constraint chat_users_users_id_fk
-            references users
-            on update cascade on delete cascade
-);
-
-alter table chat_users
-    owner to "user";
-
-create unique index chat_users_chat_id_user_id_uindex
-    on chat_users (chat_id, user_id);
-
+CREATE UNIQUE INDEX IF NOT EXISTS messages_id_uindex
+    ON messages (id);

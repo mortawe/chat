@@ -2,12 +2,13 @@ package delivery
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/mortawe/chat/internal/chat"
 	"github.com/mortawe/chat/internal/errors/apierr"
-	"github.com/mortawe/chat/internal/errors/dberr"
+	"github.com/mortawe/chat/internal/errors/ucerr"
 	"github.com/mortawe/chat/internal/models"
 
 	"github.com/fasthttp/router"
@@ -25,7 +26,7 @@ func NewChatHandler(cUC chat.UC) *ChatHandler {
 
 func (h *ChatHandler) Register(r *router.Router) {
 	r.POST("/chats/add", h.Create)
-	r.POST("/chats/get", h.GetChatsByUserID)
+	r.POST("/chats/get", h.List)
 }
 
 func (h *ChatHandler) Create(ctx *fasthttp.RequestCtx) {
@@ -35,9 +36,16 @@ func (h *ChatHandler) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	err := h.chatUC.Create(ctx, chat)
-	if dberr.IsUniqueViolationErr(err) {
-		ctx.Error(apierr.NameAlreadyInUse, http.StatusConflict)
+	if errors.Is(err, ucerr.ErrNoUser) {
+		ctx.Error(apierr.NoSuchUser, http.StatusBadRequest)
 		return
+	}
+	if errors.Is(err, ucerr.ErrNameAlreadyInUse) {
+		ctx.Error(apierr.NameInUse, http.StatusConflict)
+		return
+	}
+	if errors.Is(err, ucerr.ErrUserInChatTwice) {
+		ctx.Error(apierr.UserInChatTwice, http.StatusBadRequest)
 	}
 	if err != nil {
 		ctx.Error(err.Error(), http.StatusInternalServerError)
@@ -48,17 +56,20 @@ func (h *ChatHandler) Create(ctx *fasthttp.RequestCtx) {
 	ctx.SetStatusCode(http.StatusOK)
 }
 
-type GetByUserArgs struct {
-	User models.ID
+type ListArgs struct {
+	User models.ID `json:"user"`
 }
 
-func (h *ChatHandler) GetChatsByUserID(ctx *fasthttp.RequestCtx) {
-	args := &GetByUserArgs{}
+func (h *ChatHandler) List(ctx *fasthttp.RequestCtx) {
+	args := &ListArgs{}
 	if err := json.Unmarshal(ctx.PostBody(), &args); err != nil {
 		ctx.Error(err.Error(), http.StatusBadRequest)
 		return
 	}
-	chat, err := h.chatUC.GetChatsByUser(ctx, args.User)
+	chat, err := h.chatUC.GetList(ctx, args.User)
+	if errors.Is(err, ucerr.ErrNoUser) {
+		ctx.Error(apierr.NoSuchUser, http.StatusBadRequest)
+	}
 	if err != nil {
 		ctx.Error(err.Error(), http.StatusInternalServerError)
 		logrus.Error(err)
