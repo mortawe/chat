@@ -27,15 +27,15 @@ const (
 	insertChatUsersQ = "INSERT INTO chat_users (chat_id, user_id) VALUES "
 	getChatsByUserQ  = `SELECT chats.id, chats.name, chats.created_at, array_users.users AS users
 FROM chat_users
-         JOIN (SELECT max(created_at) AS created_at, chat_id
+         JOIN chats ON chat_users.chat_id = chats.id AND chat_users.user_id = $1
+         LEFT JOIN (SELECT max(created_at) AS created_at, chat_id
                FROM messages
                GROUP BY chat_id
-) AS last_modify ON chat_users.chat_id = last_modify.chat_id AND user_id = $1
-         JOIN chats ON chat_users.chat_id = chats.id
+            )  AS last_modify ON chat_users.chat_id = last_modify.chat_id
          JOIN (SELECT chat_id, array_agg(user_id) AS users
                FROM chat_users
                GROUP BY chat_id) AS array_users ON array_users.chat_id = chat_users.chat_id
-ORDER BY last_modify.created_at DESC`
+ORDER BY last_modify.created_at DESC NULLS LAST`
 	getChatQ = `SELECT * FROM chats WHERE id = :chat_id`
 )
 

@@ -83,3 +83,8 @@ CREATE INDEX chat_users_user_id_index
 
 CREATE INDEX messages_chat_id_index
     ON messages (chat_id);
+create index messages_chat_id_created_at_index
+	on messages (chat_id, created_at);
+
+create index messages_chat_id_created_at_index_2
+	on messages (chat_id asc, created_at desc);

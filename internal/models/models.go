@@ -28,10 +28,10 @@ type Message struct {
 }
 
 func CastInt64ArrToIdArr(arr []int64) []ID {
-	result := []ID{}
-	for _, e := range arr {
+	result := make([]ID, len(arr))
+	for i, e := range arr {
 		temp := ID(e)
-		result = append(result, temp)
+		result[i] = temp
 	}
 	return result
 }
