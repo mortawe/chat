@@ -46,7 +46,7 @@ func (h *MsgHandler) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	ctx.WriteString(fmt.Sprint(msg.ID))
-	ctx.SetStatusCode(http.StatusOK)
+	ctx.SetStatusCode(http.StatusCreated)
 }
 
 type ListMsgArgs struct {

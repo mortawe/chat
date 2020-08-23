@@ -77,3 +77,9 @@ ALTER TABLE messages
 
 CREATE UNIQUE INDEX IF NOT EXISTS messages_id_uindex
     ON messages (id);
+
+CREATE INDEX chat_users_user_id_index
+    ON chat_users (user_id);
+
+CREATE INDEX messages_chat_id_index
+    ON messages (chat_id);

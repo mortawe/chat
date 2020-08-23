@@ -53,7 +53,7 @@ func (h *ChatHandler) Create(ctx *fasthttp.RequestCtx) {
 		return
 	}
 	ctx.WriteString(fmt.Sprint(chat.ID))
-	ctx.SetStatusCode(http.StatusOK)
+	ctx.SetStatusCode(http.StatusCreated)
 }
 
 type ListArgs struct {

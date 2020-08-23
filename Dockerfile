@@ -1,8 +1,8 @@
-FROM golang:1.13-buster AS build
+FROM golang:1.15-buster AS build
 WORKDIR /app
 ADD . .
 
-RUN make build
+RUN go build -o bin/chat  ./cmd/chat
 
 ENV DB_USER=user
 ENV DB_PASS=pass
